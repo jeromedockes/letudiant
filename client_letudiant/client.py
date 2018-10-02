@@ -1,11 +1,13 @@
 import pathlib
 
 import requests
+import pandas as pd
 
 from . import scraper, utils
 
 
 LETUDIANT_DOMAIN = "https://jobs-stages.letudiant.fr"
+INTERNSHIP_URL = "https://jobs-stages.letudiant.fr/stages-etudiants/annonce"
 SEARCH_PAGE = ("https://jobs-stages.letudiant.fr/stages-etudiants/offres/"
                "libelle_libre-Comptabilit%C3%A9/domaines-101/niveaux-9_1/"
                "pays-france/page-{}.html")
@@ -53,3 +55,16 @@ def get_offers(urls, offers_dir):
             print('downloaded {}'.format(file_name))
         else:
             print('already have {}'.format(file_name))
+
+
+def read_offers(offers_dir):
+    offers_dir = pathlib.Path(offers_dir)
+    offers = []
+    for offer_page in offers_dir.glob('*.html'):
+        print('reading ', offer_page.name)
+        with open(str(offer_page), 'rb') as f:
+            offer = f.read().decode('utf-8')
+        info, _ = scraper.scrape_offer(offer)
+        info['url'] = '/'.join([INTERNSHIP_URL, offer_page.name])
+        offers.append(info)
+    return pd.DataFrame(offers)

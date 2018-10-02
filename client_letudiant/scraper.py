@@ -34,6 +34,7 @@ def scrape_offer(offer_page):
     soup = bs4.BeautifulSoup(offer_page, 'html.parser')
     info = {'date_updated': datetime.datetime.now().isoformat()}
     info.update(_get_offer_id_and_date_str(soup))
+    info.update(_get_known_editorial_elements(soup))
     return info, soup
 
 
