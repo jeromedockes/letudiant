@@ -11,7 +11,8 @@ HEADINGS = {
     'Durée': 'duration_and_start_date',
     'duration': 'duration',
     'start_date': 'start_date',
-    'Rémunération': 'remuneration'
+    'Rémunération': 'remuneration',
+    'Date de début de mission': 'start_date'
 }
 
 
@@ -50,10 +51,12 @@ def _get_known_editorial_elements(soup):
     res = {
         HEADINGS[k]: re.sub(r'\s+', ' ', '\n'.join(v)) for
         k, v in elements if k in HEADINGS}
-    for k, v in elements:
-        if k == 'Durée' and len(v) == 2:
-            res['duration'] = re.sub(r'\s+', ' ', v[0])
-            res['start_date'] = re.sub(r'\s+', ' ', v[1])
+    if 'start_date' not in res:
+        for k, v in elements:
+            if k == 'Durée' and len(v) == 2:
+                res['duration'] = re.sub(r'\s+', ' ', v[0])
+                res['start_date'] = re.sub(r'\s+', ' ', v[1])
+    res.setdefault('duration', res.get('duration_and_start_date', None))
     return {k: v.strip() for k, v in res.items()}
 
 
@@ -87,7 +90,7 @@ def _tail(elements):
             c = None
         if c == 'u-typo-h5':
             return p, e
-        if c == 'c-box--wire':
+        if c in['c-box--wire', 'u-typo--centered']:
             return p, None
         p.append(e)
 
